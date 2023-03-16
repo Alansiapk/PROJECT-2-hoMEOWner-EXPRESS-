@@ -61,7 +61,9 @@
     { "_id": ObjectId("632473246873"),
     "postId": ObjectId("8743327"), //POST ID
     "userId": ObjectId("632473246873"),
-    "reason": "moving to other contry"
+    "reason": "moving to other contry",
+    "care":"clean"
     }
 
 ]
+//.gi
