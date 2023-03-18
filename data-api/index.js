@@ -1,8 +1,16 @@
 const express = require("express");
 //it will look at the .env
 //copy all the variables from .env in our OS
-require('dotenv').config();
 const { ObjectId } = require("mongodb");
+const MongoUtil = require("./MongoUtil.js");
+require('dotenv').config();
+
+//use consts instead of hard-coded strings
+const CATCOLLECTION ="catCollection";
+const USERCOLLECTION = "userCollection";
+const DB = "hoMEOWner";
+const MONGO_URI = process.env.MONGO_URI;
+
 
 //process is always available
 //it refers to current program that is running
@@ -11,21 +19,13 @@ console.log(process.env)
 const app = express();
 app.use(express.json());//enable JSON to be sent via POST
 
-//for express to talk to mongo, liskewise we need a client
-//but this client is for nodejs
-const MongoClient = require("mongodb").MongoClient;
+
 
 async function main() {
     //connect to mongodb we need 2 parameter
     //1st connection string
     //2nd configuration object
-    const client = await MongoClient.connect(process.env.MONGO_URI, {
-        "useUnifiedTopology": true //simplify our access to Monogo
-    });
-
-    //get a hoMEOWner database
-    //store it in the db variable
-    const db = client.db("hoMEOWner");
+    const db = await MongoUtil.connect(MONGO_URI, DB);
 
     //sanity test to see that our server works(GET)
     //READ
@@ -33,18 +33,18 @@ async function main() {
     //     //send any data to the server
     //     // res.send("hello world")
     //     //after mongoDB. 
-    //     const catCollection = await db.collection("catCollection")
+    //     const catCollection = await db.collection(CATCOLLECTION)
     //         .find({})
     //         .limit(20)
     //         .toArray(); //convert an array to objects
 
-    //     console.log(catCollection);
+    //     console.log(COLLECTION);
 
     //     //send back to the client in the JSON format
     //     res.json(catCollection);
     // })
 
-    //retrieve all exisiting data (READ)
+    //(READ)retrieve all exisiting data 
     app.get("/catCollection", async function (req, res) {
 
         //accessing query strings:
@@ -68,7 +68,7 @@ async function main() {
 
         console.log(filter)
 
-        const catCollection = await db.collection("catCollection").find(filter).toArray();
+        const catCollection = await db.collection(CATCOLLECTION).find(filter).toArray();
         console.log("catCollection:", catCollection)
         res.json({
             "catCollection": catCollection
@@ -89,7 +89,7 @@ async function main() {
             return;//end the function
         }
         try {
-            const result = await db.collection("catCollection")
+            const result = await db.collection(CATCOLLECTION)
                 .insertOne({
                     "userID": req.body.userID,
                     "catName": req.body.catName,
@@ -130,7 +130,7 @@ async function main() {
             return;//end the function
         }
         try {
-            const result = await db.collection("userCollection")
+            const result = await db.collection(USERCOLLECTION)
                 .insertOne({
                     "name": req.body.name,
                     "dateOfBirth": req.body.dateOfBirth,
@@ -160,7 +160,7 @@ async function main() {
         
         //the data will in req.body
 
-        const response = await db.collection("catCollection")
+        const response = await db.collection(CATCOLLECTION)
             .updateOne({
                 "_id": new ObjectId(catId)
             }, {
@@ -187,7 +187,7 @@ async function main() {
 
     //(DELETE)
     app.delete("/catCollection/:cat_id",async function(req,res){
-        const result = await db.collection ("catCollection").deleteOne({
+        const result = await db.collection (CATCOLLECTION).deleteOne({
             "_id":new ObjectId(req.params.cat_id)
         })
         res.json({
