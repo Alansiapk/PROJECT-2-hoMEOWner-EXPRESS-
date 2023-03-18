@@ -77,7 +77,7 @@ async function main() {
 
     //add new user use "POST"
     //ensure select JSON in ARC
-    //(CREATE)
+    //(CREATE: catCollection)
     app.post("/catCollection", async function (req, res) {
 
         if (!req.body.catName) {
@@ -103,6 +103,41 @@ async function main() {
                     "medicalHistory": req.body.medicalHistory,
                     "pictureUrl": req.body.pictureUrl,
                     "adopted": req.body.adopted
+                });
+            //send back result so the client
+            //knows whetehr it is success or not
+            //and what the ID of the new document is
+            res.json({
+                "status": result
+            });
+        } catch (e) {
+            res.status(503);
+            res.json({
+                "error": "Database not available. Please try later"
+            }) //added validation to the create
+        }
+    })
+
+    //(CREATE: userCollection)
+    app.post("/userCollection", async function (req, res) {
+
+        if (!req.body.name) {
+            //we have to tell the client that the name cant be null
+            res.status(400);
+            res.json({
+                "error": "You must provide name"
+            });
+            return;//end the function
+        }
+        try {
+            const result = await db.collection("userCollection")
+                .insertOne({
+                    "name": req.body.name,
+                    "dateOfBirth": req.body.dateOfBirth,
+                    "address": req.body.address,
+                    "contactNumber": req.body.contactNumber,
+                    "email": req.body.email,
+                    "catList": req.body.catList,
                 });
             //send back result so the client
             //knows whetehr it is success or not
