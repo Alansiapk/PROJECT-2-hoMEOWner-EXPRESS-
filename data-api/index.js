@@ -6,7 +6,7 @@ const MongoUtil = require("./MongoUtil.js");
 require('dotenv').config();
 
 //use consts instead of hard-coded strings
-const CATCOLLECTION ="catCollection";
+const CATCOLLECTION = "catCollection";
 const USERCOLLECTION = "userCollection";
 const DB = "hoMEOWner";
 const MONGO_URI = process.env.MONGO_URI;
@@ -74,6 +74,30 @@ async function main() {
             "catCollection": catCollection
         })
     })
+
+    //if create medicalHistory for an existing catCollection,
+    //$push, 
+    app.post("/catCollection/:cat_id/medicalHistory", async function (req, res) {
+        //adding medicalHistory comment to the cat id equal to req.params.cat
+        const result = await db.collection(CATCOLLECTION).updateOne({
+            "_id": new ObjectId(req.params.cat_id)
+        }, {
+            "$push": {
+                "medicalHistory": {
+                    "_id": new ObjectId(),
+                    "problem": req.body.problem,
+                    "date": req.body.date,
+                    "symptoms": req.body.symptoms
+                }
+            }
+        });
+        res.json({
+            "result":result
+        })
+    }
+    )
+
+
 
     //add new user use "POST"
     //ensure select JSON in ARC
@@ -157,7 +181,7 @@ async function main() {
     app.put("/catCollection/:cat_id", async function (req, res) {
         //the data will in req.body
         const catId = req.params.cat_id;
-        
+
         //the data will in req.body
 
         const response = await db.collection(CATCOLLECTION)
@@ -186,9 +210,9 @@ async function main() {
     })
 
     //(DELETE)
-    app.delete("/catCollection/:cat_id",async function(req,res){
-        const result = await db.collection (CATCOLLECTION).deleteOne({
-            "_id":new ObjectId(req.params.cat_id)
+    app.delete("/catCollection/:cat_id", async function (req, res) {
+        const result = await db.collection(CATCOLLECTION).deleteOne({
+            "_id": new ObjectId(req.params.cat_id)
         })
         res.json({
             "status": "ok",
