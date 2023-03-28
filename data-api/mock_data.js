@@ -1,4 +1,7 @@
 //an array to represent a collection
+
+// const { ObjectId } = require("mongodb");
+
 //user collection
 [
     {
@@ -7,7 +10,8 @@
         "dateOfBirth": "1990/3/15",
         "address": "Yishun Ave 6",
         "contactNumber": "98150531",
-        "email": "alansiapk0315@gmail.com"
+        "email": "alansiapk0315@gmail.com",
+        "catList": ObjectId('6412c00edac700c9705ff129')
 
     },
     {
