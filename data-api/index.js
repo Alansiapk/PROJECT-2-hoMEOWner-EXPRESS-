@@ -127,6 +127,7 @@ async function main() {
                     "neutered": req.body.neutered,
                     "personality": req.body.personality,
                     "familyStatus": req.body.familyStatus,
+                    "comment": req.body.comment,
                     "medicalHistory": req.body.medicalHistory,
                     "pictureUrl": req.body.pictureUrl,
                     "adopted": req.body.adopted
