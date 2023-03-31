@@ -8,7 +8,7 @@ const client = await MongoClient.connect(mongo_uri, {
 });
 
  //get a hoMEOWner database
-    //store it in the db variable
+    //store it in the db variablecd 
     const db = client.db(databaseName); //DB
     return db;
 }

@@ -130,7 +130,7 @@ async function main() {
                     "comment": req.body.comment,
                     "medicalHistory": req.body.medicalHistory,
                     "pictureUrl": req.body.pictureUrl,
-                    "adopted": req.body.adopted
+                    
                 });
             //send back result so the client
             //knows whetehr it is success or not
