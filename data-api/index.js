@@ -18,11 +18,28 @@ const MONGO_URI = process.env.MONGO_URI;
 
 //process is always available
 //it refers to current program that is running
-console.log(process.env)
+//console.log(process.env)
 
 const app = express();
 app.use(express.json());//enable JSON to be sent via POST
 app.use(cors())
+
+const validNameSimple = (str) => {
+    if(str === ""){
+        return false
+    } else {
+        return true
+    }
+}
+
+const validCatName = (str) => {
+    console.log("🚀 ~ file: index.js:36 ~ validCatName ~ str:", str)
+    if(str.trim().length < 4){
+        return false;
+    }  else {
+        return true; 
+    }
+}
 
 async function main() {
     //connect to mongodb we need 2 parameter
@@ -52,10 +69,10 @@ async function main() {
             }
         }
 
-        console.log(filter)
+        //console.log(filter)
 
         const catCollection = await db.collection(CATCOLLECTION).find(filter).toArray();
-        console.log("catCollection:", catCollection)
+        //console.log("catCollection:", catCollection)
         res.json({
             "catCollection": catCollection
         })
@@ -65,7 +82,7 @@ async function main() {
     app.get("/rehomePost", async function (req, res) {
 
         const rehomePost = await db.collection(REHOMEPOST).find({}).toArray();
-        console.log("rehomePost:", rehomePost)
+        //console.log("rehomePost:", rehomePost)
         res.json({
             "rehomePost": rehomePost
         })
@@ -75,7 +92,7 @@ async function main() {
     app.get("/userCollection", async function (req, res) {
 
         const userCollection = await db.collection(USERCOLLECTION).find({}).toArray();
-        console.log("userCollection:", userCollection)
+        //console.log("userCollection:", userCollection)
         res.json({
             "userCollection": userCollection
         })
@@ -107,42 +124,41 @@ async function main() {
     //(CREATE: catCollection)
     app.post("/catCollection", async function (req, res) {
 
-        if (!req.body.catName) {
-            //we have to tell the client that the name cant be null
-            res.status(400);
-            res.json({
-                "error": "You must provide name"
-            });
-            return;//end the function
-        }
-        try {
-            const result = await db.collection(CATCOLLECTION)
-                .insertOne({
-                    "userID": req.body.userID,
-                    "catName": req.body.catName,
-                    "catAge": req.body.catAge,
-                    "catBreed": req.body.catBreed,
-                    "catGender": req.body.catGender,
-                    "requireHomeVisit": req.body.requireHomeVisit,
-                    "neutered": req.body.neutered,
-                    "personality": req.body.personality,
-                    "familyStatus": req.body.familyStatus,
-                    "comment": req.body.comment,
-                    "medicalHistory": req.body.medicalHistory,
-                    "pictureUrl": req.body.pictureUrl,
-                    
+        let {catName , catAge} = req.body;
+        if(!validCatName(catName)){
+            console.log("name length must be more than 4 character")
+        }else {
+            try {
+                const result = await db.collection(CATCOLLECTION)
+                    .insertOne({
+                        "userID": req.body.userID,
+                        "catName": req.body.catName,
+                        "catAge": req.body.catAge,
+                        "catBreed": req.body.catBreed,
+                        "catGender": req.body.catGender,
+                        "requireHomeVisit": req.body.requireHomeVisit,
+                        "neutered": req.body.neutered,
+                        "personality": req.body.personality,
+                        "familyStatus": req.body.familyStatus,
+                        "comment": req.body.comment,
+                        "medicalHistory": req.body.medicalHistory,
+                        "pictureUrl": req.body.pictureUrl,
+                        
+                    });
+                //send back result so the client
+                //knows whetehr it is success or not
+                //and what the ID of the new document is
+           
+                res.json({
+                    "status": result
                 });
-            //send back result so the client
-            //knows whetehr it is success or not
-            //and what the ID of the new document is
-            res.json({
-                "status": result
-            });
-        } catch (e) {
-            res.status(503);
-            res.json({
-                "error": "Database not available. Please try later"
-            }) //added validation to the create
+    
+            } catch (e) {
+                res.status(503);
+                res.json({
+                    "error": "Database not available. Please try later"
+                }) //added validation to the create
+            }
         }
     })
 
@@ -182,6 +198,13 @@ async function main() {
 
     //(CREATE: userCollection), insertOne
     app.post("/userCollection", async function (req, res) {
+        console.log("🚀 ~ file: index.js:198 ~ req:", req.body)
+
+        let { name , email} = req.body;
+        if(!validNameSimple(name)){
+            console.log("The name is empty");
+        }
+        else{}
 
         if (!req.body.name) {
             //we have to tell the client that the name cant be null
@@ -208,6 +231,7 @@ async function main() {
                 "status": result
             });
         } catch (e) {
+        
             res.status(503);
             res.json({
                 "error": "Database not available. Please try later"
