@@ -1,5 +1,5 @@
 
-export const validName = (str) => {
+export const validCatName = (str) => {
     if(str === ""){
         return [false, "* name is required"];
     } else if (str.trim().length < 4) {

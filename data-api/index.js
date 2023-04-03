@@ -25,7 +25,7 @@ app.use(express.json());//enable JSON to be sent via POST
 app.use(cors())
 
 const validNameSimple = (str) => {
-    if(str === ""){
+    if (str === "") {
         return false
     } else {
         return true
@@ -33,12 +33,17 @@ const validNameSimple = (str) => {
 }
 
 const validCatName = (str) => {
-    console.log("🚀 ~ file: index.js:36 ~ validCatName ~ str:", str)
-    if(str.trim().length < 4){
+
+    if (str.trim().length < 4) {
         return false;
-    }  else {
-        return true; 
+    } else {
+        return true;
     }
+}
+ 
+const validCatAge = (str) => {
+    let nAge = Number(str.trim());
+    return !isNaN(nAge);
 }
 
 async function main() {
@@ -58,6 +63,40 @@ async function main() {
             //add the catname criteria to the filter objeect
             filter.catName = {
                 "$regex": req.query.catName,
+                "$options": "i" //turn on case sensitive
+            }
+        }
+
+        // breed
+
+        if (req.query.catBreed) {
+            //add the catname criteria to the filter objeect
+            filter.catBreed = {
+                "$regex": req.query.catBreed,
+                "$options": "i" //turn on case sensitive
+            }
+        }
+
+        if (req.query.catGender) {
+            //add the catname criteria to the filter objeect
+            filter.catGender = {
+                "$regex": req.query.catGender,
+                "$options": "i" //turn on case sensitive
+            }
+        }
+
+        if (req.query.requireHomeVisit) {
+            //add the catname criteria to the filter objeect
+            filter.requireHomeVisit = {
+                "$regex": req.query.requireHomeVisit,
+                "$options": "i" //turn on case sensitive
+            }
+        }
+
+        if (req.query.neutered) {
+            //add the catname criteria to the filter objeect
+            filter.neutered = {
+                "$regex": req.query.neutered,
                 "$options": "i" //turn on case sensitive
             }
         }
@@ -111,12 +150,12 @@ async function main() {
                     "_id": new ObjectId(),
                     "problem": req.body.problem,
                     "date": req.body.date
-                    
+
                 }
             }
         });
         res.json({
-            "result":result
+            "result": result
         })
     }
     )
@@ -124,41 +163,51 @@ async function main() {
     //(CREATE: catCollection)
     app.post("/catCollection", async function (req, res) {
 
-        let {catName , catAge} = req.body;
-        if(!validCatName(catName)){
-            console.log("name length must be more than 4 character")
-        }else {
-            try {
-                const result = await db.collection(CATCOLLECTION)
-                    .insertOne({
-                        "userID": req.body.userID,
-                        "catName": req.body.catName,
-                        "catAge": req.body.catAge,
-                        "catBreed": req.body.catBreed,
-                        "catGender": req.body.catGender,
-                        "requireHomeVisit": req.body.requireHomeVisit,
-                        "neutered": req.body.neutered,
-                        "personality": req.body.personality,
-                        "familyStatus": req.body.familyStatus,
-                        "comment": req.body.comment,
-                        "medicalHistory": req.body.medicalHistory,
-                        "pictureUrl": req.body.pictureUrl,
-                        
-                    });
-                //send back result so the client
-                //knows whetehr it is success or not
-                //and what the ID of the new document is
-           
-                res.json({
-                    "status": result
+        let { catName, catAge } = req.body;
+        if (!validCatName(catName)) {
+            res.status(400);
+            res.json({
+                "error": "Name length must be more than 4 characters"
+            });
+            return;
+        }
+        if (!validCatAge(catAge)) {
+            res.status(400);
+            res.json({
+                "error": "Cat age invalid"
+            });
+            return;
+        }
+        try {
+            const result = await db.collection(CATCOLLECTION)
+                .insertOne({
+                    "userID": req.body.userID,
+                    "catName": req.body.catName,
+                    "catAge": req.body.catAge,
+                    "catBreed": req.body.catBreed,
+                    "catGender": req.body.catGender,
+                    "requireHomeVisit": req.body.requireHomeVisit,
+                    "neutered": req.body.neutered,
+                    "personality": req.body.personality,
+                    "familyStatus": req.body.familyStatus,
+                    "comment": req.body.comment,
+                    "medicalHistory": req.body.medicalHistory,
+                    "pictureUrl": req.body.pictureUrl,
+
                 });
-    
-            } catch (e) {
-                res.status(503);
-                res.json({
-                    "error": "Database not available. Please try later"
-                }) //added validation to the create
-            }
+            //send back result so the client
+            //knows whetehr it is success or not
+            //and what the ID of the new document is
+
+            res.json({
+                "status": result
+            });
+
+        } catch (e) {
+            res.status(503);
+            res.json({
+                "error": "Database not available. Please try later"
+            }); //added validation to the create
         }
     })
 
@@ -180,7 +229,7 @@ async function main() {
                     "catId": req.body.catId,
                     "reason": req.body.reason,
                     "dateofPost": new Date()
-                    
+
                 });
             //send back result so the client
             //knows whetehr it is success or not
@@ -200,11 +249,11 @@ async function main() {
     app.post("/userCollection", async function (req, res) {
         console.log("🚀 ~ file: index.js:198 ~ req:", req.body)
 
-        let { name , email} = req.body;
-        if(!validNameSimple(name)){
+        let { name, email } = req.body;
+        if (!validNameSimple(name)) {
             console.log("The name is empty");
         }
-        else{}
+        else { }
 
         if (!req.body.name) {
             //we have to tell the client that the name cant be null
@@ -222,7 +271,7 @@ async function main() {
                     "address": req.body.address,
                     "contactNumber": req.body.contactNumber,
                     "email": req.body.email
-                   
+
                 });
             //send back result so the client
             //knows whetehr it is success or not
@@ -231,7 +280,7 @@ async function main() {
                 "status": result
             });
         } catch (e) {
-        
+
             res.status(503);
             res.json({
                 "error": "Database not available. Please try later"
@@ -279,13 +328,13 @@ async function main() {
             "medicalHistory._id": new ObjectId(req.params.medicalHistory_id)
         }, {
             "$set": {
-                    "medicalHistory.$.problem": req.body.problem,
-                    "medicalHistory.$.date": req.body.date,
-                    "medicalHistory.$.symptoms":req.body.symptoms
-                }
+                "medicalHistory.$.problem": req.body.problem,
+                "medicalHistory.$.date": req.body.date,
+                "medicalHistory.$.symptoms": req.body.symptoms
+            }
         });
         res.json({
-            "results":results
+            "results": results
         })
     }
     )
@@ -301,8 +350,8 @@ async function main() {
         })
     })
 
-     //(DELETE), deleteOne rehomePost
-     app.delete("/rehomePost/:rehomepost_id", async function (req, res) {
+    //(DELETE), deleteOne rehomePost
+    app.delete("/rehomePost/:rehomepost_id", async function (req, res) {
         const result = await db.collection(REHOMEPOST).deleteOne({
             "_id": new ObjectId(req.params.rehomepost_id)
         })
@@ -322,10 +371,10 @@ async function main() {
             "result": result
         })
     })
-    
-    
-    
-    ;
+
+
+
+        ;
 }
 
 main();
