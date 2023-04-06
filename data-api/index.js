@@ -81,24 +81,20 @@ async function main() {
             //add the catname criteria to the filter objeect
             filter.catGender = {
                 "$regex": req.query.catGender,
-                "$options": "i" //turn on case sensitive
+               
             }
         }
 
         if (req.query.requireHomeVisit) {
             //add the catname criteria to the filter objeect
             filter.requireHomeVisit = {
-                "$regex": req.query.requireHomeVisit,
-                "$options": "i" //turn on case sensitive
+                "$regex": req.query.requireHomeVisit, 
             }
         }
 
         if (req.query.neutered) {
             //add the catname criteria to the filter objeect
-            filter.neutered = {
-                "$regex": req.query.neutered,
-                "$options": "i" //turn on case sensitive
-            }
+            filter.neutered = req.query.neutered
         }
 
         //Array filter
@@ -177,7 +173,9 @@ async function main() {
                 "error": "Cat age invalid"
             });
             return;
-        }
+        } 
+
+        // if (){}
         try {
             const result = await db.collection(CATCOLLECTION)
                 .insertOne({
