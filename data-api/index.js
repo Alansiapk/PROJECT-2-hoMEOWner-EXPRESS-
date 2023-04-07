@@ -24,27 +24,122 @@ const app = express();
 app.use(express.json());//enable JSON to be sent via POST
 app.use(cors())
 
-const validNameSimple = (str) => {
-    if (str === "") {
-        return false
-    } else {
-        return true
-    }
-}
-
-const validCatName = (str) => {
-
-    if (str.trim().length < 4) {
+//validation function
+const validCatBreed = (breed) => {
+    if (typeof (breed) !== 'string' || !breed.match(/^[A-Za-z]+( [A-Za-z]+)*$/)) {
         return false;
     } else {
         return true;
     }
 }
- 
+
+const validCatName = (str) => {
+    if (str === "") {
+        return false;
+    } if (str.trim().length < 3) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 const validCatAge = (str) => {
     let nAge = Number(str.trim());
     return !isNaN(nAge);
 }
+
+const validCatGender = (gender) => {
+    if (gender !== 'Male' && gender !== "Female") {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+const validRequireHomeVisit = (x) => {
+    if (x != true && x !== false) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+const validNeutered = (x) => {
+    if (x != true && x !== false) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+const validPersonality = (x) => {
+    if (!Array.isArray(x)) {
+        // send error if not array
+        return false;
+    } else {
+        return x.every(fstatus => {
+            return fstatus.includes('i knew too much') || fstatus.includes('party animal') || fstatus.includes('love bug')
+                || fstatus.includes('secret admirer') || fstatus.includes('MVP') || fstatus.includes('shy');
+        });
+    }
+}
+
+const validFamilyStatus = (x) => {
+    if (!Array.isArray(x)) {
+        // send error if not array
+        return false;
+    } else {
+        return x.every(fstatus => {
+            return fstatus.includes('Good with kids') || fstatus.includes('Good with other cats') || fstatus.includes('Leave me alone');
+        });
+    }
+}
+
+const validComment = (str) => {
+
+    if (str.trim().length > 150) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+// const validProblem = (str) => {
+
+//     if (str.trim().length > 50) {
+//         return false;
+//     } else {
+//         return true;
+//     }
+// }
+
+const validatePictureUrl = (x) => {
+    if (!x.match(/^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+const validName = (str) => {
+    if (str === "") {
+        return false;
+    } if (str.trim().length < 3) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+const validEmail = (email) => {
+    if (email === "") {
+        return false;
+    } else if (/^\w+([-]?\w+)@\w+([-]?\w+)(\.\w{2,3})+$/.test(email)) {
+        return true;
+    } else {
+        return false;
+    }
+};
 
 async function main() {
     //connect to mongodb we need 2 parameter
@@ -81,14 +176,14 @@ async function main() {
             //add the catname criteria to the filter objeect
             filter.catGender = {
                 "$regex": req.query.catGender,
-               
+
             }
         }
 
         if (req.query.requireHomeVisit) {
             //add the catname criteria to the filter objeect
             filter.requireHomeVisit = {
-                "$regex": req.query.requireHomeVisit, 
+                "$regex": req.query.requireHomeVisit,
             }
         }
 
@@ -159,11 +254,12 @@ async function main() {
     //(CREATE: catCollection)
     app.post("/catCollection", async function (req, res) {
 
-        let { catName, catAge } = req.body;
+        let { catName, catAge, catBreed, catGender, requireHomeVisit, neutered, personality, familyStatus, comment,
+            pictureUrl, medicalHistory} = req.body;
         if (!validCatName(catName)) {
             res.status(400);
             res.json({
-                "error": "Name length must be more than 4 characters"
+                "error": "Cat name length must be more than 2 characters"
             });
             return;
         }
@@ -173,7 +269,78 @@ async function main() {
                 "error": "Cat age invalid"
             });
             return;
-        } 
+        }
+
+        if (!validCatBreed(catBreed)) {
+            res.status(400);
+            res.json({
+                "error": "Cat breed invalid"
+            });
+            return;
+        }
+
+        if (!validCatGender(catGender)) {
+            res.status(400);
+            res.json({
+                "error": "Please select cat gender"
+            });
+            return;
+        }
+
+        if (!validRequireHomeVisit(requireHomeVisit)) {
+            res.status(400);
+            res.json({
+                "error": "Please select if require home visit"
+            });
+            return;
+        }
+
+        if (!validNeutered(neutered)) {
+            res.status(400);
+            res.json({
+                "error": "Please select if is neutered"
+            });
+            return;
+        }
+
+        if (!validPersonality(personality)) {
+            res.status(400);
+            res.json({
+                "error": "Please select personality"
+            });
+            return;
+        }
+
+        if (!validFamilyStatus(familyStatus)) {
+            res.status(400);
+            res.json({
+                "error": "Please select the family status"
+            });
+            return;
+        }
+
+        if (!validComment(comment)) {
+            res.status(400);
+            res.json({
+                "error": "Cat comment length must be less than 150 characters"
+            });
+            return;
+        }
+
+        if (!validatePictureUrl(pictureUrl)) {
+            res.status(400);
+            res.json({
+                "error": "Please insert correct pictureUrl"
+            });
+            return;
+        }
+        // if (!validProblem(problem)) {
+        //     res.status(400);
+        //     res.json({
+        //         "error": "problem length must be less than 50 characters"
+        //     });
+        //     return;
+        // }
 
         // if (){}
         try {
@@ -189,7 +356,9 @@ async function main() {
                     "personality": req.body.personality,
                     "familyStatus": req.body.familyStatus,
                     "comment": req.body.comment,
-                    "medicalHistory": req.body.medicalHistory,
+                    // "medicalHistory": req.body.medicalHistory,
+                    // "medicalHistory.$.problem": req.body.problem,
+                    // "medicalHistory.$.date": req.body.date,
                     "pictureUrl": req.body.pictureUrl,
 
                 });
@@ -248,19 +417,24 @@ async function main() {
         console.log("🚀 ~ file: index.js:198 ~ req:", req.body)
 
         let { name, email } = req.body;
-        if (!validNameSimple(name)) {
-            console.log("The name is empty");
-        }
-        else { }
 
-        if (!req.body.name) {
-            //we have to tell the client that the name cant be null
+        if (!validName(name)) {
             res.status(400);
             res.json({
-                "error": "You must provide name"
+                "error": "Name length must be more than 2 characters"
             });
-            return;//end the function
+            return;
         }
+
+        if (!validEmail(email)) {
+            res.status(400);
+            res.json({
+                "error": "invalid email, email must contain special character"
+            });
+            return;
+        }
+
+
         try {
             const result = await db.collection(USERCOLLECTION)
                 .insertOne({
