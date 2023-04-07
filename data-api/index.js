@@ -49,7 +49,7 @@ const validCatAge = (str) => {
 }
 
 const validCatGender = (gender) => {
-    if (gender !== 'Male' && gender !== "Female") {
+    if (gender !== "Male" && gender !== "Female") {
         return false;
     } else {
         return true;
@@ -57,7 +57,7 @@ const validCatGender = (gender) => {
 }
 
 const validRequireHomeVisit = (x) => {
-    if (x != true && x !== false) {
+    if (x != "Yes Required" && x !== "Not Required") {
         return false;
     } else {
         return true;
@@ -65,7 +65,7 @@ const validRequireHomeVisit = (x) => {
 }
 
 const validNeutered = (x) => {
-    if (x != true && x !== false) {
+    if (x != "Neutered" && x !== "NotNeutered") {
         return false;
     } else {
         return true;
