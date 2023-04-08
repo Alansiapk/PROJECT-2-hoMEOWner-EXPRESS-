@@ -360,13 +360,13 @@ async function main() {
             return;
         }
 
-        // if (!validProblem(problem)) {
-        //     res.status(400);
-        //     res.json({
-        //         "error": "problem length must be less than 50 characters"
-        //     });
-        //     return;
-        // }
+        if (!validProblem(problem)) {
+            res.status(400);
+            res.json({
+                "error": "problem length must be less than 50 characters"
+            });
+            return;
+        }
         if (!validDate(date)) {
             res.status(400);
             res.json({
