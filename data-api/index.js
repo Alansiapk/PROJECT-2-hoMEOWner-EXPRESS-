@@ -104,14 +104,25 @@ const validComment = (str) => {
     }
 }
 
-// const validProblem = (str) => {
+const validProblem = (str) => {
 
-//     if (str.trim().length > 50) {
-//         return false;
-//     } else {
-//         return true;
-//     }
-// }
+    if (str.trim().length > 50) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+const validDate = (date) => {
+    // if (typeof (date) !== 'string' || !date.match(/^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/)) {
+    //     return false;
+    // }
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){
+        return false;
+    }else{
+        return true;
+    }
+}
 
 const validatePictureUrl = (x) => {
     if (!x.match(/^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/)) {
@@ -231,31 +242,45 @@ async function main() {
 
     //if create medicalHistory comment for an existing catCollection,
     //updateOne,"$push", 
-    app.post("/catCollection/:cat_id/medicalHistory", async function (req, res) {
-        //adding medicalHistory comment to the cat id equal to req.params.cat
-        const result = await db.collection(CATCOLLECTION).updateOne({
-            "_id": new ObjectId(req.params.cat_id)
-        }, {
-            "$push": {
-                "medicalHistory": {
-                    "_id": new ObjectId(),
-                    "problem": req.body.problem,
-                    "date": req.body.date
+    app.post("/catCollection/medicalHistory/", async function (req, res) {
 
+        let { problem, date, cat_id} = req.body;
+       
+        
+        try {
+            //adding medicalHistory comment to the cat id equal to req.params.cat
+            const result = await db.collection(CATCOLLECTION).insertOne({
+                "_id": new ObjectId(cat_id)
+            }, {
+                "$push": {
+                    "medicalHistory": {
+                        "_id": new ObjectId(),
+                        "problem": req.body.problem,
+                        "date": req.body.date
+
+                    }
                 }
-            }
-        });
-        res.json({
-            "result": result
-        })
-    }
-    )
+            });
+            console.log("🚀 ~ file: index.js:279 ~ result ~ result:", result);
+            res.json({
+                "result": result
+            });
+        } catch (e) {
+
+            res.status(503);
+            res.json({
+                "error": "Database not available. Please try later"
+            }) //added validation to the create
+        }
+
+    })
     //add new user use "POST", insertOne
     //(CREATE: catCollection)
     app.post("/catCollection", async function (req, res) {
 
-        let { catName, catAge, catBreed, catGender, requireHomeVisit, neutered, personality, familyStatus, comment,
-            pictureUrl, medicalHistory} = req.body;
+        let { catName, catAge, catBreed, catGender, requireHomeVisit, neutered, personality, familyStatus, comment, pictureUrl, date, problem } = req.body;
+        console.log("🚀 ~ file: index.js:298 ~ problem:", problem)
+        console.log("🚀 ~ file: index.js:298 ~ date:", date)
         if (!validCatName(catName)) {
             res.status(400);
             res.json({
@@ -334,6 +359,7 @@ async function main() {
             });
             return;
         }
+
         // if (!validProblem(problem)) {
         //     res.status(400);
         //     res.json({
@@ -341,6 +367,14 @@ async function main() {
         //     });
         //     return;
         // }
+        if (!validDate(date)) {
+            res.status(400);
+            res.json({
+                "error": "please insert correct date"
+            });
+            return;
+        }
+
 
         // if (){}
         try {
@@ -356,6 +390,12 @@ async function main() {
                     "personality": req.body.personality,
                     "familyStatus": req.body.familyStatus,
                     "comment": req.body.comment,
+                    "medicalHistory" : [
+                        {
+                            problem: req.body.problem,
+                            date: req.body.date
+                        }
+                    ],
                     // "medicalHistory": req.body.medicalHistory,
                     // "medicalHistory.$.problem": req.body.problem,
                     // "medicalHistory.$.date": req.body.date,
